@@ -43,34 +43,26 @@ MMAP:   res=mmap(NULL,size+sizeof(size),PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANO
 
 int myfree(void* ptr){
     int res;
-    if(ptr==NULL||is_already_freed(ptr)){
+    if(ptr==NULL){
         return -1;
     }
-
-    int* tmp=(int*)ptr;
-    int len;
-    tmp--;
-    len=*tmp;
-    if(len>=SMALL_ALLOC){
-MUNMAP: res=munmap(tmp,len+sizeof(int));
-        if(res==-1){
-            //perror("munmap failed");
-            return -1;
-        }
-        add_to_freed_list(ptr);
-        return 0;
-
-}   else{
-        //printf("using buddy_free\n");
+    if(is_buddy(ptr)){
         res=buddy_free_mem(alloc,ptr);
+        return res;
+    }
+    else{
+        int* temp=ptr-sizeof(int);
+        int size=*temp;
+        res=munmap(temp,size+sizeof(int));
         if(res==-1){
-            //perror("free failed-using munmap\n");
-            goto MUNMAP;
+            perror("munmap failed");
             return -1;
         }
-        add_to_freed_list(ptr);
-        return 0;
-    }}
+        else return res;
+
+
+    }
+}
 int is_already_freed(void *ptr)  {
     ptr_list_item *current = list;
     while (current != NULL) {
@@ -80,6 +72,15 @@ int is_already_freed(void *ptr)  {
         current = current->next;
     }
     return 0; 
+}
+int is_buddy(void* ptr){
+    if(ptr==NULL){
+        return 0;
+    }
+    if(alloc->buf<=ptr&&ptr<=alloc->buf+alloc->usable_mem){
+        return 1;
+    }
+    else return 0;
 }
 void pop_from_freed(void *ptr) {
     ptr_list_item *current = list;

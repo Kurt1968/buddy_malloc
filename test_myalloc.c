@@ -9,14 +9,14 @@ int main() {
 
     int *ptr1 = myalloc(sizeof(int));
     *ptr1 = 42;
-    printf("Test 1: %d\n", is_buddy(ptr1));
+    printf("Test 1: %d\n", ptr1);
     //printf("Test 1: %d\n", *ptr1);
 
 
     // Test 2: Allocazione di una grande quantità di memoria con myalloc
     char *ptr2 = myalloc(1024 * sizeof(char));
     strcpy(ptr2, "May the force be with you!");
-    printf("Test 2: %d\n", is_buddy(ptr2));
+    printf("Test 2: %s\n", ptr2);
 
     // Test 3: Tentativo di liberare un puntatore nullo con myfree
     int result3 = myfree(NULL);
@@ -31,8 +31,14 @@ int main() {
     printf("Test 5: myfree(ptr2) result = %d\n", result5);
 
     // Test 6: Tentativo di liberare un puntatore già liberato con myfree
-   // int result6 = myfree(ptr2);
-   // printf("Test 6: myfree(ptr2) (seconda volta) result = %d\n", result6);
+    printf("LIST:");
+    print_freed_list();
+    printf("POINTER:");
+    printf("%p\n",ptr1);
+    printf("IS ALREADY FREED:");
+    printf("%d\n",is_already_freed(ptr1));
+   int result6 = myfree(ptr1);
+   printf("Test 6: myfree(ptr2) (seconda volta) result = %d\n", result6);
 
     // Test 7: Allocazione di memoria con myalloc dopo la liberazione
     int *ptr7 = myalloc(sizeof(int));

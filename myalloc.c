@@ -3,7 +3,8 @@
 int initialized=0;
 uint8_t mem[1024*1024+1024+sizeof(bitmap_tree)+sizeof(bitmap)+sizeof(buddy_alloc)];
 buddy_alloc* alloc;
-ptr_list_item* list=NULL;
+void* list[100];
+int last_index=-1;
 
 
 void* myalloc(int size){
@@ -33,9 +34,6 @@ MMAP:   res=mmap(NULL,size+sizeof(size),PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANO
         }
         else{
             res=temp;
-            if(is_already_freed(res)){
-                pop_from_freed(res);
-            }
             return res;
         }
     }
@@ -43,7 +41,7 @@ MMAP:   res=mmap(NULL,size+sizeof(size),PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANO
 
 int myfree(void* ptr){
     int res;
-    if(ptr==NULL){
+    if(ptr==NULL||is_already_freed(ptr)){
         return -1;
     }
     if(is_buddy(ptr)){
@@ -58,20 +56,24 @@ int myfree(void* ptr){
             perror("munmap failed");
             return -1;
         }
-        else return res;
+        else{
+            add_to_freed_list(ptr);
+            return res;
+        }
 
 
     }
 }
 int is_already_freed(void *ptr)  {
-    ptr_list_item *current = list;
-    while (current != NULL) {
-        if (current->ptr == ptr) {
-            return 1; 
+    for(int i=0;i<100;i++){
+        if(list[i]==ptr){
+            return 1;
         }
-        current = current->next;
+        else if(list[i]==NULL){
+            return 0;
+        }
     }
-    return 0; 
+    return 0;
 }
 int is_buddy(void* ptr){
     if(ptr==NULL){
@@ -83,30 +85,29 @@ int is_buddy(void* ptr){
     else return 0;
 }
 void pop_from_freed(void *ptr) {
-    ptr_list_item *current = list;
-    ptr_list_item *prev = NULL;
-    while (current != NULL) {
-        if (current->ptr == ptr) {
-            if (prev == NULL) {
-                list = current->next;
-            } else {
-                prev->next = current->next;
+    for(int i=0;i<100;i++){
+        if(list[i]==ptr){
+            list[i]=NULL;
+            for (int j = i; j < 99; j++) {
+                list[j] = list[j + 1];
             }
-            free(current);
             return;
         }
-        prev = current;
-        current = current->next;
+    }
+}
+void print_freed_list() {
+    for(int i=0;i<100;i++){
+        if(list[i]!=NULL){
+            printf("%p\n",list[i]);
+        }
     }
 }
 
 void add_to_freed_list(void *ptr) {
-    ptr_list_item *new_node = (ptr_list_item *)malloc(sizeof(ptr_list_item));
-    if (new_node == NULL) {
-        perror("malloc failed");
-        exit(-1); 
+    last_index++;
+    if(last_index==100){
+        last_index=0;
     }
-    new_node->ptr = ptr;
-    new_node->next = list;
-    list = new_node;
+    list[last_index]=ptr;
+    return;
 }

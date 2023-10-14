@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <math.h>
 
+#define LEVELS 10
 //===================== BITMAP =====================
 //Enumerazione degli stati per facilità di lettura
 typedef enum state{

@@ -10,7 +10,7 @@ int last_index=-1;
 void* myalloc(int size){
     if(!initialized){
         memset(mem,0,1024*1024);
-        alloc=buddy_init(mem,1024*1024+512+sizeof(bitmap_tree)+sizeof(bitmap)+sizeof(buddy_alloc),LEVELS);
+        alloc=buddy_init(mem,1024*1024+1024+sizeof(bitmap_tree)+sizeof(bitmap)+sizeof(buddy_alloc),LEVELS);
         initialized=1;
     }
     int* res;
@@ -53,7 +53,7 @@ int myfree(void* ptr){
         int size=*temp;
         res=munmap(temp,size+sizeof(int));
         if(res==-1){
-            perror("munmap failed");
+            //perror("munmap failed");
             return -1;
         }
         else{
@@ -79,7 +79,7 @@ int is_buddy(void* ptr){
     if(ptr==NULL){
         return 0;
     }
-    if(alloc->buf<=ptr&&ptr<=alloc->buf+alloc->usable_mem){
+    if(alloc->buf<=(uint8_t*)ptr&&(uint8_t*)ptr<=alloc->buf+alloc->usable_mem){
         return 1;
     }
     else return 0;
@@ -110,4 +110,10 @@ void add_to_freed_list(void *ptr) {
     }
     list[last_index]=ptr;
     return;
+}
+
+void myprint(){
+    printf("=============================================\n");
+    print_bitmap(alloc->tree->bm);
+    printf("=============================================\n");
 }

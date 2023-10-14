@@ -42,7 +42,7 @@ uint8_t get_bit(bitmap* bm, int index){
 }
 
 int get_bytes(int bits){
-    return(bits>>3+(bits%8)!=0);
+    return(bits>>(3+(bits%8))!=0);
 }
 
 //IMPLEMENTAZIONE BITMAP TREE
@@ -176,4 +176,24 @@ void set_tree_bit(bitmap_tree *tree, int bit, state status){
 
 int get_tree_bit(bitmap_tree *tree, int bit){
     return get_bit(tree->bm, bit);
+}
+
+void print_bitmap(bitmap* bm){
+    printf("Bitmap:\n");
+    /*
+    int i=0;
+    while (i<LEVELS){
+        int start = pow(2, i);
+        int end = pow(2, i+1);
+        for(int j=start;j<end;j++){
+            printf("%d", get_bit(bm, j));
+        }
+        printf("\n");
+        i++;
+    printf("\n");}
+    */
+    for(int i=0;i<bm->bits;i++){
+        printf("%d", get_bit(bm, i));
+    }
+    printf("\n");
 }

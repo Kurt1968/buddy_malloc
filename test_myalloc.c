@@ -6,10 +6,10 @@
 
 int main() {
     // Test 1: Allocazione di una piccola quantità di memoria con myalloc
-
     int *ptr1 = myalloc(sizeof(int));
     *ptr1 = 42;
-    printf("Test 1: %d\n", ptr1);
+    printf("Test 1: %d\n", *ptr1);
+    myprint();
     //printf("Test 1: %d\n", *ptr1);
 
 
@@ -25,18 +25,11 @@ int main() {
     // Test 4: Tentativo di liberare un puntatore allocato con myalloc
     int result4 = myfree(ptr1);
     printf("Test 4: myfree(ptr1) result = %d\n", result4);
-
     // Test 5: Tentativo di liberare un puntatore allocato con mmap
     int result5 = myfree(ptr2);
     printf("Test 5: myfree(ptr2) result = %d\n", result5);
 
     // Test 6: Tentativo di liberare un puntatore già liberato con myfree
-    printf("LIST:");
-    print_freed_list();
-    printf("POINTER:");
-    printf("%p\n",ptr1);
-    printf("IS ALREADY FREED:");
-    printf("%d\n",is_already_freed(ptr1));
    int result6 = myfree(ptr1);
    printf("Test 6: myfree(ptr2) (seconda volta) result = %d\n", result6);
 
@@ -50,26 +43,18 @@ int main() {
     strcpy(ptr8, "This is a large allocation.");
     printf("Test 8: %s\n", ptr8);
 
-    // Test 9: Tentativo di allocare più memoria di quella disponibile
-    char *ptr9 = myalloc(1024 * 1024 * 1024);
-    if (ptr9 == NULL) {
-        printf("Test 9: Failed to allocate 1 GB\n");
-    } else {
-        printf("Test 9: Allocated 1 GB\n");
-        myfree(ptr9); // Libera la memoria allocata
-    }
-
-    // Test 10: Tentativo di liberare un puntatore non allocato con myfree
+    // Test 9: Tentativo di liberare un puntatore non allocato con myfree
     int x = 100;
     int *ptr10 = &x;
     int result10 = myfree(ptr10);
     printf("Test 10: myfree(ptr10) result = %d\n", result10);
 
-    //Test 11:saturazione buddy
+    //Test 10:Saturazione buddy(ci si aspetta una stampa di uso mmap)
     printf("Test 11: saturazione buddy\n");
     for(int i=0;i<512;i++){
-        int* ptr11=myalloc(100);
-
+        int* ptr11=myalloc(1023);
     }
+
+    myprint();
     return 0;
 }

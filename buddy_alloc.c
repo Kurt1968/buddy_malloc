@@ -10,7 +10,7 @@ buddy_alloc* buddy_init(uint8_t* buf,int buf_size, int levels){
     alloc->buf=tree_buf+tree_size;
     alloc->buf_size=buf_size-tree_size-sizeof(buddy_alloc);
     alloc->items=pow(2,levels);
-    alloc->min_bucket=alloc->buf_size>>levels-1;
+    alloc->min_bucket=alloc->buf_size>>(levels-1);
     alloc->leafs=alloc->buf_size/alloc->min_bucket;
     alloc->usable_mem=alloc->leafs*alloc->min_bucket;
     return alloc;
@@ -33,6 +33,9 @@ void* get_buddy(buddy_alloc* alloc,int level){
         res=res+sizeof(int);
         return res;
     }
+    else{
+        return NULL;
+    }
 } 
 
 void* buddy_alloc_mem(buddy_alloc* alloc,int size){
@@ -52,7 +55,7 @@ void* buddy_alloc_mem(buddy_alloc* alloc,int size){
 
 int buddy_free_mem(buddy_alloc* alloc,void* ptr){
     if(ptr!=NULL){
-       int offset=(uint8_t*)ptr-(int)alloc->buf-sizeof(int);
+       int offset=(int)ptr-(int)alloc->buf-sizeof(int);
        int offset_max=alloc->usable_mem;
        if(offset>offset_max){
            return -1;
@@ -67,5 +70,8 @@ int buddy_free_mem(buddy_alloc* alloc,void* ptr){
         set_parent(alloc->tree,index,tree_level(alloc->tree,index),FREE);
         set_child(alloc->tree,index,FREE);
         return 0;
+    }
+    else{
+        return -1;
     }
 }

@@ -47,10 +47,10 @@ int main() {
     int x = 100;
     int *ptr10 = &x;
     int result10 = myfree(ptr10);
-    printf("Test 10: myfree(ptr10) result = %d\n", result10);
+    printf("Test 9: myfree(ptr10) result = %d\n", result10);
 
     //Test 10:Saturazione buddy(ci si aspetta una stampa di uso mmap)
-    printf("Test 11: saturazione buddy\n");
+    printf("Test 10: saturazione buddy\n");
     for(int i=0;i<512;i++){
         int* ptr11=myalloc(1023);
     }

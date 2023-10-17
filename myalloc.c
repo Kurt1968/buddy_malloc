@@ -18,7 +18,7 @@ MMAP:   res=mmap(NULL,size+sizeof(size),PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANO
             perror("mmap failed");
             return NULL;
         }
-        *res=size;
+        *res=size+sizeof(int);
         return (void*)&res[1];
     }else{
         void* temp=buddy_alloc_mem(alloc,size);
@@ -37,6 +37,7 @@ MMAP:   res=mmap(NULL,size+sizeof(size),PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANO
 int myfree(void* ptr){
     int res;
     int size=0;
+    int* temp=NULL;
     if(ptr==NULL){
         return -1;
     }
@@ -45,10 +46,19 @@ int myfree(void* ptr){
         return res;
     }
     else{
-        void* temp=ptr-sizeof(int);
-        res=munmap(temp,size+sizeof(int));
+        int* temp=ptr;
+        temp--;
+        /* Facendo così valgrind non si lamenta comunque
+        if(*temp<=0){
+            return -1;
+        }*/
+        size=*temp;
+        if(size<=0){
+            return -1;
+        }
+        res=munmap(temp,size);
         if(res==-1){
-            //perror("munmap failed");
+            perror("munmap failed");
             return -1;
         }
         return res;
